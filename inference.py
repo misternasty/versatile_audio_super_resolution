@@ -158,7 +158,8 @@ class Predictor():
         guidance_scale: float = 3.5,
         overlap: float = 0.04,
         chunk_size: float = 10.24,
-        seed: int = None
+        seed: int = None,
+        output_folder:str = None
     ):
 
         if seed == 0:
@@ -223,7 +224,8 @@ def infer(
         guidance_scale=guidance_scale,
         seed=seed,
         chunk_size=chunk_size,
-        overlap=overlap
+        overlap=overlap,
+        output_folder=output_folder
     )
 
     del p
