@@ -44,10 +44,12 @@ def lr_filter(audio, cutoff, filter_type, order=12, sr=48000):
     return filtered_audio.T
 
 class Predictor():
-    def setup(self, model_name="basic", device="auto"):
+    def setup(self, model_name="basic", device="auto", input_cutoff=None, multiband_ensemble=None):
         self.model_name = model_name
         self.device = device
         self.sr = 48000
+        self.input_cutoff=input_cutoff
+        self.multiband_ensemble=multiband_ensemble
         print("Loading Model...")
         self.audiosr = build_model(model_name=self.model_name, device=self.device)
         # print(self.audiosr)
@@ -55,11 +57,11 @@ class Predictor():
         print("Model loaded!")
 
     def process_audio(self, input_file, chunk_size=5.12, overlap=0.1, seed=None, guidance_scale=3.5, ddim_steps=50):
-        audio, sr = librosa.load(input_file, sr=input_cutoff * 2, mono=False)
+        audio, sr = librosa.load(input_file, sr=self.input_cutoff * 2, mono=False)
         audio = audio.T
-        sr = input_cutoff * 2
+        sr = self.input_cutoff * 2
         print(f"audio.shape = {audio.shape}")
-        print(f"input cutoff = {input_cutoff}")
+        print(f"input cutoff = {self.input_cutoff}")
         
         is_stereo = len(audio.shape) == 2
         audio_channels = [audio] if not is_stereo else [audio[:, 0], audio[:, 1]]
@@ -139,7 +141,7 @@ class Predictor():
 
         reconstructed_audio = np.stack(reconstructed_channels, axis=-1) if is_stereo else reconstructed_channels[0]
 
-        if multiband_ensemble:
+        if self.multiband_ensemble:
             low, _ = librosa.load(input_file, sr=48000, mono=False)
             output = match_array_shapes(reconstructed_audio[0].T, low)
             low = lr_filter(low.T, crossover_freq, 'lowpass', order=10)
@@ -215,7 +217,7 @@ def infer(
 
     p = Predictor()
     
-    p.setup(device='auto', model_name=model_name)
+    p.setup(device='auto', model_name=model_name, input_cutoff=input_cutoff, multiband_ensemble=multiband_ensemble)
 
 
     out = p.predict(
