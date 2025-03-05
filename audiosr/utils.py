@@ -378,20 +378,12 @@ class MyProgressBar:
 
 def download_checkpoint(checkpoint_name="basic"):
     if checkpoint_name == "basic":
-        model_id = "haoheliu/audiosr_basic"
-
-        checkpoint_path = hf_hub_download(
-            repo_id=model_id, filename="pytorch_model.bin"
-        )
+        model_id = "/modal_vols/models/audiosr_basic"
     elif checkpoint_name == "speech":
-        model_id = "haoheliu/audiosr_speech"
-
-        checkpoint_path = hf_hub_download(
-            repo_id=model_id, filename="pytorch_model.bin"
-        )
+        model_id = "/modal_vols/models/audiosr_speech"
     else:
         raise ValueError("Invalid Model Name %s" % checkpoint_name)
-    return checkpoint_path
+    return model_id
 
 
 def get_basic_config():
