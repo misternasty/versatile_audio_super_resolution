@@ -378,9 +378,9 @@ class MyProgressBar:
 
 def download_checkpoint(checkpoint_name="basic"):
     if checkpoint_name == "basic":
-        model_id = "/modal_vols/models/audiosr_basic"
+        model_id = "/modal_vols/models/audiosr_basic/pytorch_model.bin"
     elif checkpoint_name == "speech":
-        model_id = "/modal_vols/models/audiosr_speech"
+        model_id = "/modal_vols/models/audiosr_speech/pytorch_model.bin"
     else:
         raise ValueError("Invalid Model Name %s" % checkpoint_name)
     return model_id
