@@ -168,7 +168,6 @@ class Predictor():
         print(f"guidance_scale = {guidance_scale}")
         print(f"ddim_steps = {ddim_steps}")
         print(f"chunk_size = {chunk_size}")
-        print(f"multiband_ensemble = {multiband_ensemble}")
         print(f"input file = {os.path.basename(input_file)}")
         os.makedirs(output_folder, exist_ok=True)
         waveform = self.process_audio(
