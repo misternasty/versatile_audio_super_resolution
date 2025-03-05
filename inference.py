@@ -5,11 +5,10 @@ import numpy as np
 from scipy.signal.windows import hann
 import soundfile as sf
 import torch
-from cog import BasePredictor, Input, Path
 import tempfile
 import argparse
 import librosa
-from audiosr import build_model, super_resolution
+from audiosr.pipeline import build_model, super_resolution
 from scipy import signal
 import pyloudnorm as pyln
 
@@ -44,7 +43,7 @@ def lr_filter(audio, cutoff, filter_type, order=12, sr=48000):
     filtered_audio = signal.sosfiltfilt(sos, audio)
     return filtered_audio.T
 
-class Predictor(BasePredictor):
+class Predictor():
     def setup(self, model_name="basic", device="auto"):
         self.model_name = model_name
         self.device = device
@@ -154,13 +153,13 @@ class Predictor(BasePredictor):
 
 
     def predict(self,
-        input_file: Path = Input(description="Audio to upsample"),
-        ddim_steps: int = Input(description="Number of inference steps", default=50, ge=10, le=500),
-        guidance_scale: float = Input(description="Scale for classifier free guidance", default=3.5, ge=1.0, le=20.0),
-        overlap: float = Input(description="overlap size", default=0.04),
-        chunk_size: float = Input(description="chunksize", default=10.24),
-        seed: int = Input(description="Random seed. Leave blank to randomize the seed", default=None)
-    ) -> Path:
+        input_file,
+        ddim_steps: int = 50,
+        guidance_scale: float = 3.5,
+        overlap: float = 0.04,
+        chunk_size: float = 10.24,
+        seed: int = None
+    ):
 
         if seed == 0:
             seed = random.randint(0, 2**32 - 1)
@@ -188,6 +187,49 @@ class Predictor(BasePredictor):
         gc.collect()
         torch.cuda.empty_cache()
 
+
+def infer(
+        input_path: str, 
+        output: str, 
+        ddim_steps: int = 50, 
+        chunk_size: float = 10.24, 
+        guidance_scale: float = 3.5, 
+        seed: int = 0, 
+        overlap: float = 0.04, 
+        input_cutoff: int = 12000, 
+        multiband_ensemble: bool = False,
+        model_name: str = "basic"
+    ):
+
+    input_file_path = input_path
+    output_folder = output
+    ddim_steps = ddim_steps
+    chunk_size = chunk_size
+    guidance_scale = guidance_scale
+    seed = seed
+    overlap = overlap
+    input_cutoff = input_cutoff
+    multiband_ensemble = multiband_ensemble
+
+    crossover_freq = input_cutoff - 1000
+
+    p = Predictor()
+    
+    p.setup(device='auto', model_name=model_name)
+
+
+    out = p.predict(
+        input_file_path,
+        ddim_steps=ddim_steps,
+        guidance_scale=guidance_scale,
+        seed=seed,
+        chunk_size=chunk_size,
+        overlap=overlap
+    )
+
+    del p
+    gc.collect()
+    torch.cuda.empty_cache()
 
 if __name__ == "__main__":
 
